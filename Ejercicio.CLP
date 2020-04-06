@@ -1,3 +1,8 @@
+
+;En este punto he decidido empezar con Weka así que no habrán commits hasta acabar weka
+
+;;; -------- ---------
+
 (deffacts BH 	(Robot mostrador 0 pesoPortado 50 pesoMax)
 		(Posiciones mostrador 1 2 3 4)
 		(Tarea 1 30 peso 1 a mostrador)
@@ -7,19 +12,19 @@
 )
 
 ;;; -------- ---------
-;
 
 (defrule comprobar-coger-en-lugar
 	(declare (salience 15))
 	?f  <-  (Robot ?pos ?peso pesoPortado ?pesoMax pesoMax $?paquetes)
 		(Tarea ?n ?pesoObjeto peso ?pos a ?pos2)
 		
-	(test (<= ?pesoObjeto ?pesoMax))
+	(test (<= (+ ?peso ?pesoObjeto) ?pesoMax))
+	(test (not (member$ ?n $?paquetes)))
 
 	 =>
 
 	(retract ?f)
-	(assert (Robot ?pos ?pesoObjeto pesoPortado ?pesoMax pesoMax ?n))
+	(assert (Robot ?pos (+ ?peso ?pesoObjeto) pesoPortado ?pesoMax pesoMax $?paquetes ?n))
 )
 
 (defrule comprobar-dejar-en-lugar
@@ -38,11 +43,22 @@
 
 (defrule moverse-derecha
 	(declare (salience 10))
-	?f  <-  (Robot ?pos ?peso pesoPortado ?pesoMax pesoMax)
+	?f  <-  (Robot ?pos ?peso pesoPortado ?pesoMax pesoMax $?paquetes)
 		(Posiciones $?resto1 ?pos ?pos2 $?resto2)
 	
 	=>
 	
 	(retract ?f)
-	(assert (Robot ?pos2 ?peso pesoPortado ?pesoMax pesoMax))
+	(assert (Robot ?pos2 ?peso pesoPortado ?pesoMax pesoMax $paquetes))
+)
+
+(defrule moverse-izquierda
+	(declare (salience 10))
+	?f  <-  (Robot ?pos ?peso pesoPortado ?pesoMax pesoMax $?paquetes)
+		(Posiciones $?resto1 ?pos ?pos2 $?resto2)
+	
+	=>
+	
+	(retract ?f)
+	(assert (Robot ?pos2 ?peso pesoPortado ?pesoMax pesoMax $?paquetes))
 )
